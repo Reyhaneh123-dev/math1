@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>آزمایشگاه مجموعه‌ها</title>
+<style>
+body {
+  font-family: 'Vazir', Tahoma, sans-serif;
+  background: #f2f7fb;
+  padding: 20px;
+  color: #222;
+}
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+  max-width: 750px;
+  margin: auto;
+}
+h1 { text-align: center; color: #0077cc; }
+label { display: block; margin-top: 10px; }
+select, input, button {
+  font-family: inherit;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 100%;
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+button {
+  background: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 14px;
+  font-size: 15px;
+}
+button:hover { background: #005fa3; }
+#formulaA {
+  background: #eef6ff;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+  text-align: center;
+  direction: ltr;
+}
+#membersOutput, #vennOutput, #axisOutput {
+  margin-top: 10px;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 10px;
+}
+.big {
+  background: #ff9800;
+  font-size: 16px;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>آزمایشگاه مجموعه‌ها</h1>
+
+  <h2>تعریف مجموعه A</h2>
+
+  <label>مجموعه A عضو کدام مجموعه شناخته‌شده است؟</label>
+  <select id="knownSet">
+    <option value="">-- انتخاب کنید --</option>
+    <option value="N">اعداد طبیعی (N)</option>
+    <option value="Z">اعداد صحیح (Z)</option>
+    <option value="W">اعداد حسابی (W)</option>
+    <option value="Q">اعداد گویا (Q)</option>
+    <option value="R">اعداد حقیقی (R)</option>
+  </select>
+
+  <div id="formulaA"></div>
+
+  <label>در صورت وجود شرط، آن را به زبان کلامی بنویس:</label>
+  <input id="verbal" type="text" placeholder="مثلاً کوچکتر از ۵ باشد">
+
+  <button id="makeSet">نمایش مجموعه</button>
+
+  <div id="membersOutput"></div>
+  <button id="showVenn">نمایش با نمودار ون</button>
+  <div id="vennOutput"></div>
+
+  <button id="showAxis">نمایش مجموعه روی محور</button>
+  <div id="axisOutput"></div>
+
+  <button class="big" id="goToOps">انجام عملیات ریاضی →</button>
+</div>
+
+<script>
+let setA = [];
+
+document.getElementById('makeSet').onclick = () => {
+  const base = document.getElementById('knownSet').value;
+  const verbal = document.getElementById('verbal').value.trim();
+  const box = document.getElementById('formulaA');
+
+  if (!base) {
+    box.innerHTML = 'لطفاً نوع مجموعه را انتخاب کنید.';
+    return;
+  }
+
+  let condition = '';
+  if (verbal.includes('کوچکتر')) condition = '| x < ' + verbal.match(/\d+/)?.[0];
+  else if (verbal.includes('بزرگتر')) condition = '| x > ' + verbal.match(/\d+/)?.[0];
+
+  box.innerHTML = `A = { x ∈ ${base} ${condition} }`;
+
+  // ساخت مجموعه نمونه برای نمایش اعضا
+  if (['Q','R'].includes(base)) {
+    setA = [];
+  } else if (base === 'N') {
+    setA = Array.from({length:10},(_,i)=>i+1);
+  } else if (base === 'W') {
+    setA = Array.from({length:11},(_,i)=>i);
+  } else if (base === 'Z') {
+    setA = Array.from({length:11},(_,i)=>i-5);
+  }
+
+  document.getElementById('membersOutput').innerText = '';
+  document.getElementById('vennOutput').innerText = '';
+  document.getElementById('axisOutput').innerText = '';
+};
+
+document.getElementById('showVenn').onclick = () => {
+  const base = document.getElementById('knownSet').value;
+  const out = document.getElementById('vennOutput');
+  if (['Q','R'].includes(base)) {
+    out.innerText = 'نمایش نمودار ون برای مجموعه‌های حقیقی یا گویا امکان‌پذیر نیست.';
+    return;
+  }
+  out.innerHTML = `<svg width="200" height="150">
+    <circle cx="100" cy="75" r="60" stroke="#0077cc" fill="rgba(0,119,204,0.1)" />
+    <text x="90" y="80" font-size="18">A</text>
+  </svg>`;
+};
+
+document.getElementById('showAxis').onclick = () => {
+  const base = document.getElementById('knownSet').value;
+  const out = document.getElementById('axisOutput');
+  if (['Q','R'].includes(base)) {
+    out.innerText = 'نمایش روی محور برای مجموعه‌های حقیقی یا گویا امکان‌پذیر نیست.';
+    return;
+  }
+  out.innerHTML = `<div style="border-top:2px solid #333;height:40px;position:relative;">
+  ${Array.from({length:10}, (_,i)=>`<div style='position:absolute;left:${i*10}%;top:10px;font-size:12px;'>${i}</div>`).join('')}
+  </div>`;
+};
+
+document.getElementById('makeSet').addEventListener('click', () => {
+  const base = document.getElementById('knownSet').value;
+  const out = document.getElementById('membersOutput');
+  if (['Q','R'].includes(base)) {
+    out.innerText = 'به دلیل اینکه عضو اعداد حقیقی یا گویا است، نمایش اعضا امکان‌پذیر نیست.';
+    return;
+  }
+  out.innerText = `A = { ${setA.join(', ')} }`;
+});
+
+// انتقال به صفحه عملیات
+document.getElementById('goToOps').onclick = () => {
+  localStorage.setItem('setA', JSON.stringify(setA));
+  window.location.href = 'operations.html';
+};
+</script>
+</body>
+</html>
