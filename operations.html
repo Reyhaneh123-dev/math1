@@ -1,0 +1,3 @@
+// دریافت مجموعه A از صفحه قبل
+const setA = JSON.parse(localStorage.getItem('setA')) || [1,2,3,4,5];
+document.getElementById('setA').innerHTML = 'A = { ' + setA.join(', ') + ' }';
